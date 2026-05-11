@@ -1,0 +1,173 @@
+@import "tailwindcss";
+
+/* ── Stitch design token system ──────────────────────────────────────────── */
+@theme {
+  /* Background / surface layers */
+  --color-bg: #0a0a0f;
+  --color-surface: #111118;
+  --color-surface-2: #1a1a24;
+  --color-surface-dim: #13131b;
+  --color-surface-container: #1f1f27;
+  --color-surface-container-low: #1b1b23;
+  --color-surface-container-high: #292932;
+  --color-surface-container-highest: #34343d;
+  --color-surface-container-lowest: #0d0d15;
+  --color-surface-bright: #393841;
+  --color-surface-variant: #34343d;
+
+  /* Border */
+  --color-border: #2a2a3a;
+  --color-outline: #908fa0;
+  --color-outline-variant: #464554;
+
+  /* Primary (indigo) */
+  --color-primary: #c0c1ff;
+  --color-primary-container: #8083ff;
+  --color-on-primary: #1000a9;
+  --color-on-primary-container: #0d0096;
+  --color-accent-hover: #818cf8;
+  --color-accent-dim: rgba(99, 102, 241, 0.15);
+  --color-inverse-primary: #494bd6;
+
+  /* Secondary (cyan) */
+  --color-secondary: #5de6ff;
+  --color-secondary-container: #00cbe6;
+  --color-on-secondary: #00363e;
+  --color-on-secondary-container: #00515d;
+
+  /* Tertiary (amber/orange) */
+  --color-tertiary: #ffb783;
+  --color-tertiary-container: #d97721;
+  --color-on-tertiary: #4f2500;
+  --color-on-tertiary-container: #452000;
+
+  /* Text */
+  --color-on-surface: #e4e1ed;
+  --color-on-surface-variant: #c7c4d7;
+  --color-on-background: #e4e1ed;
+  --color-text-primary: #e2e2f0;
+  --color-text-muted: #7a7a9a;
+  --color-inverse-surface: #e4e1ed;
+  --color-inverse-on-surface: #303038;
+
+  /* Semantic */
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-error: #ffb4ab;
+  --color-error-container: #93000a;
+  --color-on-error: #690005;
+
+  /* Chart palette */
+  --color-chart-flare: #f59e0b;
+  --color-chart-wind: #22d3ee;
+  --color-chart-cme: #ec4899;
+  --color-chart-kp: #6366f1;
+
+  /* Legacy token aliases (used in existing inline styles) */
+  --color-text: #e2e2f0;
+  --color-accent: #6366f1;
+  --color-accent-hover: #818cf8;
+  --color-kp-low: #22c55e;
+  --color-kp-mid: #f59e0b;
+  --color-kp-high: #ef4444;
+  --color-chart-1: #6366f1;
+  --color-chart-2: #22d3ee;
+  --color-chart-3: #f59e0b;
+  --color-chart-4: #ec4899;
+
+  /* Font families */
+  --font-wordmark: "Inter", sans-serif;
+  --font-headline-xl: "Inter", sans-serif;
+  --font-headline-md: "Inter", sans-serif;
+  --font-body-base: "Inter", sans-serif;
+  --font-metadata: "Inter", sans-serif;
+  --font-telemetry: "JetBrains Mono", monospace;
+  --font-axis-ticks: "JetBrains Mono", monospace;
+
+  /* Font sizes */
+  --text-wordmark: 30px;
+  --text-wordmark--line-height: 1.2;
+  --text-wordmark--letter-spacing: 0.05em;
+  --text-wordmark--font-weight: 700;
+
+  --text-headline-xl: 24px;
+  --text-headline-xl--line-height: 32px;
+  --text-headline-xl--font-weight: 700;
+
+  --text-headline-md: 18px;
+  --text-headline-md--line-height: 28px;
+  --text-headline-md--font-weight: 600;
+
+  --text-body-base: 14px;
+  --text-body-base--line-height: 20px;
+
+  --text-telemetry: 13px;
+  --text-telemetry--line-height: 1.4;
+  --text-telemetry--font-weight: 500;
+
+  --text-metadata: 12px;
+  --text-metadata--line-height: 16px;
+
+  --text-axis-ticks: 10px;
+  --text-axis-ticks--line-height: 1;
+
+  /* Spacing / sizing */
+  --spacing-navbar-height: 56px;
+  --spacing-section-padding: 1.5rem;
+  --spacing-card-padding: 1rem;
+  --spacing-grid-gap: 1rem;
+  --spacing-container-max: 1280px;
+}
+
+/* ── Base resets ─────────────────────────────────────────────────────────── */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: #0a0a0f;
+    color: #e4e1ed;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100dvh;
+  }
+
+  /* Material Symbols base settings */
+  .material-symbols-outlined {
+    font-variation-settings:
+      "FILL" 0,
+      "wght" 400,
+      "GRAD" 0,
+      "opsz" 24;
+    vertical-align: middle;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #13131b;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2a2a3a;
+    border-radius: 2px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #c0c1ff;
+  }
+}

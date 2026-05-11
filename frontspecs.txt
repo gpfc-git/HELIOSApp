@@ -1,0 +1,531 @@
+HELIOS DECK — Front-End Visual Specification
+============================================
+For use with Stitch (or any AI design tool) to generate the visual UI layer.
+Paste this file as context. Design React components with Tailwind CSS v4.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. PROJECT IDENTITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Name:        HELIOS DECK
+Tagline:     Cosmic Observatory · Real-time space weather & geophysical signals
+Aesthetic:   Dark space / mission control. Think NASA ground control room meets
+             a modern SaaS dashboard. Deep blacks, glowing indigo accents,
+             data-dense but clean. No gradients on backgrounds — flat dark panels.
+             Subtle glow effects on active/live indicators only.
+Type:        SPA (Single Page Application), no server-side rendering.
+Framework:   React 19 + Vite + Tailwind CSS v4
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. COLOR TOKENS  (defined in src/styles/index.css as CSS custom properties)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Background layers (darkest → lightest):
+  --color-bg:           #0a0a0f    ← page background
+  --color-surface:      #111118    ← card / panel background
+  --color-surface-2:    #1a1a24    ← input / inner element background
+  --color-border:       #2a2a3a    ← all borders and dividers
+
+Text:
+  --color-text:         #e2e2f0    ← primary text
+  --color-text-muted:   #7a7a9a    ← labels, metadata, secondary
+
+Accent (indigo — brand primary):
+  --color-accent:       #6366f1
+  --color-accent-hover: #818cf8
+  --color-accent-dim:   rgba(99, 102, 241, 0.15)   ← badge backgrounds
+
+Semantic:
+  --color-success:      #22c55e    ← live / ok / quiet Kp
+  --color-warning:      #f59e0b    ← warning / unsettled Kp / solar flare class M
+  --color-danger:       #ef4444    ← error / storm Kp / solar flare class X
+
+Kp Index thresholds:
+  Kp 0–3  →  --color-kp-low:   #22c55e   (Quiet)
+  Kp 4–6  →  --color-kp-mid:   #f59e0b   (Unsettled / Storm)
+  Kp 7–9  →  --color-kp-high:  #ef4444   (Severe Storm)
+
+Chart palette (one color per signal):
+  --color-chart-1:  #6366f1   ← Kp Index
+  --color-chart-2:  #22d3ee   ← Solar Wind Speed
+  --color-chart-3:  #f59e0b   ← Solar Flares
+  --color-chart-4:  #ec4899   ← Coronal Mass Ejections
+  ISS uses --color-success (#22c55e)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. TYPOGRAPHY & SPACING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Font:         system-ui / sans-serif (no custom font required)
+Base size:    14–16px body, 12px for labels/metadata, 10px for axis ticks
+Monospace:    ui-monospace / Consolas — used for coordinates, values, class badges
+Headings:     font-bold, text-[var(--color-text)], no decorative fonts
+Code/values:  font-mono, e.g. "M2.1", "523.4 km/s", "51.2342°"
+
+Spacing system: use Tailwind's default scale. Cards have p-4. Grid gap-4.
+Border radius: rounded-xl for cards, rounded-lg for inputs/buttons, rounded-md
+               for small badges, rounded-full for dot indicators.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. ROUTES & PAGES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+/login               → LoginPage          (public, no navbar)
+/dashboard           → DashboardPage      (protected)
+/signals             → SignalCatalogPage  (protected)
+/signals/:id         → SignalDetailPage   (protected, id = signal key below)
+*                    → NotFoundPage       (public, no navbar)
+
+Protected routes are wrapped in a layout that includes the Navbar at the top.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. LAYOUT SHELL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Navbar (sticky top, height 56px):
+  Background: --color-surface, border-bottom: --color-border
+  Left:   "HELIOS DECK" wordmark in --color-accent-hover, font-bold tracking-wide
+  Center: Nav links — "Dashboard" (/dashboard) and "Signals" (/signals)
+          Active link: bg --color-accent-dim, text --color-accent-hover
+          Inactive: text --color-text-muted, hover text --color-text
+  Right:  "Logout" button — text-only, hover color --color-danger
+
+Page content area:
+  max-w-7xl mx-auto px-4 py-6
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. PAGE: LOGIN  (/login)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Centered on screen, no navbar. Background: --color-bg.
+
+Card (max-w-sm, centered):
+  Background: --color-surface, border: --color-border, rounded-xl, p-6
+
+Content:
+  - Wordmark "HELIOS DECK" (text-3xl, font-bold, --color-accent-hover)
+  - Subtitle "Cosmic Observatory · Sign in to continue" (text-sm, --color-text-muted)
+  - Username input (label + text input)
+  - Password input (label + password input)
+  - Error message area (text-sm, --color-danger) — shown on failed login
+  - "Sign in" button (full width, bg --color-accent, white text, rounded-lg)
+    Disabled + 50% opacity while loading, label changes to "Signing in…"
+  - Helper text: 'Demo credentials: emilys / emilyspass' (text-xs, muted)
+
+Input style:
+  bg --color-surface-2, border --color-border, rounded-lg, px-3 py-2, text-sm
+  Focus: ring-2 ring --color-accent
+
+Auth API endpoint:
+  POST https://dummyjson.com/auth/login
+  Body: { "username": "emilys", "password": "emilyspass", "expiresInMins": 60 }
+  Response: { accessToken, id, username, firstName, ... }
+  On success: store accessToken + user in localStorage, redirect to /dashboard
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. PAGE: DASHBOARD  (/dashboard)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Page header:
+  Title "Dashboard" (text-xl font-bold)
+  Subtitle "Real-time geophysical and heliophysical signals" (text-sm, muted)
+
+Widget grid:
+  grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4
+
+Widgets rendered (in order):
+  1. SolarFlareWidget    — event_feed type
+  2. SolarWindWidget     — time_chart type
+  3. KpIndexWidget       — gauge type
+  4. CMEWidget           — time_chart type
+  5. ISSWidget           — live data type
+
+Each widget is a SignalCard (see section 9).
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. PAGE: SIGNAL CATALOG  (/signals)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Page header:
+  Title "Signal Catalog"
+  Subtitle "5 signals aggregated from public APIs"
+
+List of signal rows (flex-col gap-3). Each row is a link to /signals/:id.
+
+Row card (bg --color-surface, border, rounded-xl, p-4):
+  Left side:
+    - Signal label (font-semibold, text-sm)
+    - Widget type badge (colored border + text matching signal's color, rounded-full)
+    - Description (text-xs, muted, truncated)
+  Right side (shrink-0, text-right):
+    - Source name (text-xs, muted)
+    - Update cadence (text-xs, muted)
+
+Hover state: border transitions to --color-accent
+
+Signal registry (id → label, source, description, cadence, color, widgetType):
+
+  solar_flare_events:
+    Label:       "Solar Flares"
+    Description: "X-ray bursts from the Sun classified C, M or X by intensity."
+    Source:      "NASA DONKI"
+    Cadence:     "~1 hour"
+    Color:       #f59e0b  (--color-chart-3)
+    WidgetType:  "Event Feed"
+
+  coronal_mass_ejections:
+    Label:       "Coronal Mass Ejections"
+    Description: "Large expulsions of plasma and magnetic field from the solar corona."
+    Source:      "NASA DONKI"
+    Cadence:     "~1 hour"
+    Color:       #ec4899  (--color-chart-4)
+    WidgetType:  "Chart"
+
+  solar_wind_speed:
+    Label:       "Solar Wind Speed"
+    Description: "Speed of plasma streaming from the Sun measured by NOAA."
+    Source:      "NOAA SWPC"
+    Cadence:     "~1 minute"
+    Color:       #22d3ee  (--color-chart-2)
+    WidgetType:  "Chart"
+
+  kp_index:
+    Label:       "Kp Index"
+    Description: "Global geomagnetic activity index on a scale of 0 to 9."
+    Source:      "NOAA SWPC"
+    Cadence:     "~3 hours"
+    Color:       #6366f1  (--color-chart-1)
+    WidgetType:  "Gauge"
+
+  iss_coordinates:
+    Label:       "ISS Position"
+    Description: "Real-time orbital position of the International Space Station."
+    Source:      "wheretheiss.at"
+    Cadence:     "~5 minutes"
+    Color:       #22c55e  (--color-success)
+    WidgetType:  "Live"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. PAGE: SIGNAL DETAIL  (/signals/:id)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Back link: "← Back to Catalog" (text-xs, muted, links to /signals)
+Title: signal label (text-xl, font-bold)
+Subtitle: signal description (text-sm, muted)
+
+Metadata grid (grid-cols-2 sm:grid-cols-4 gap-3):
+  Each cell — bg --color-surface, border, rounded-lg, p-3
+  Label (text-xs, muted) on top, value (text-sm, font-medium) below.
+  Fields: Source, Unit, Cadence, Signal ID
+
+Full-width widget (max-w-xl):
+  Renders the same widget component as on the dashboard, but full width.
+
+API endpoint display:
+  Label "API endpoint" (text-xs, muted)
+  URL in a <code> block: bg --color-surface-2, border, rounded-md, px-3 py-2,
+  text-xs, break-all, text --color-text
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+10. SHARED COMPONENT: SignalCard
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Card shell used by every widget. bg --color-surface, border --color-border,
+rounded-xl, p-4, flex flex-col gap-4.
+
+Header row (flex, space-between):
+  Left:
+    - Title (text-sm, font-semibold, --color-text)
+    - Source badge below title (text-xs, px-1.5 py-0.5, rounded-full, border,
+      color and border match the signal's accent color, bg is 10% opacity of that color)
+  Right:
+    - Last updated time (text-xs, muted, shrink-0) formatted as HH:MM
+
+Body slot: contains the widget's specific content.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+11. SHARED COMPONENT: LoadingState
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Skeleton rows — animate-pulse, bg --color-surface-2, rounded-md, h-5.
+Default 3 rows. Shown while any query is in loading state.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+12. SHARED COMPONENT: ErrorState
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Centered column. Warning icon (⚠️), error message in --color-danger (text-sm),
+optional "Retry" button (text-xs, border --color-border, rounded-md, muted text).
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+13. SHARED COMPONENT: EmptyState
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Centered column. Moon icon (🌑), message in --color-text-muted (text-sm).
+Shown when API returned successfully but with zero items.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+14. WIDGET: SolarFlareWidget  (signal: solar_flare_events)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Type: Event Feed (list)
+Accent color: #f59e0b
+
+Content: chronological list of up to 8 solar flare events.
+Each row:
+  - Class badge (font-mono, text-xs, px-2 py-0.5, rounded-md)
+    X class → --color-danger,  M class → --color-warning,  C class → --color-success
+    Background is 15% opacity of the badge color.
+  - Source location (text-xs, muted, truncated, flex-1) e.g. "N15W30"
+  - Date (text-xs, muted, shrink-0) formatted as "May 8"
+
+Data shape per item (after normalization):
+  {
+    timestamp: "2026-04-18T12:00:00Z",   // ISO string (begin time)
+    value: {
+      classType: "M2.1",                  // e.g. C, M, X followed by number
+      beginTime: "2026-04-18T12:00:00Z",
+      peakTime: "2026-04-18T12:45:00Z",
+      endTime: "2026-04-18T13:00:00Z",
+      sourceLocation: "N15W30"            // solar location string
+    },
+    source: "NASA_DONKI",
+    unit: "flare_class"
+  }
+
+API endpoint:
+  GET https://api.nasa.gov/DONKI/FLR?startDate=YYYY-MM-DD&api_key=KEY
+  Fetches last 30 days. Refetches every 30 minutes.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+15. WIDGET: CMEWidget  (signal: coronal_mass_ejections)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Type: Line chart (TimeChart)
+Accent color: #ec4899
+
+Chart:
+  X axis: timestamp formatted as HH:MM
+  Y axis: ejection speed in km/s
+  Line color: #ec4899
+  Height: 200px, responsive width
+  No dots on line; active dot radius 4 on hover
+  Grid lines: dashed, --color-border
+  Tooltip: dark card style matching surface colors
+
+Data shape per item (after normalization):
+  {
+    timestamp: "2026-04-20T08:00:00Z",
+    value: {
+      speed: 523,        // km/s — the Y axis value
+      type: "C3",        // CME type
+      note: "..."
+    },
+    source: "NASA_DONKI",
+    unit: "km/s"
+  }
+
+API endpoint:
+  GET https://api.nasa.gov/DONKI/CME?startDate=YYYY-MM-DD&api_key=KEY
+  Fetches last 30 days. Refetches every 30 minutes.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+16. WIDGET: SolarWindWidget  (signal: solar_wind_speed)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Type: Line chart (TimeChart) + current value header
+Accent color: #22d3ee
+
+Current value header (shown above chart):
+  - "Speed" label + value in km/s (large, color #22d3ee)
+  - "Density" label + value in p/cm³ (large, color #f59e0b)
+
+Chart:
+  X axis: timestamp HH:MM
+  Y axis: speed in km/s
+  Line color: #22d3ee
+  Last 100 readings from a 7-day window
+
+Data shape per item (after normalization):
+  {
+    timestamp: "2026-05-10 14:00:00.000",   // NOAA date string
+    value: {
+      speed: 412.3,        // km/s — Y axis
+      density: 5.2,        // p/cm³
+      temperature: 84200   // Kelvin
+    },
+    source: "NOAA_SWPC",
+    unit: "km/s"
+  }
+
+API endpoint:
+  GET https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json
+  Returns array of arrays: first row = headers [time_tag, density, speed, temperature]
+  Refetches every 5 minutes.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+17. WIDGET: KpIndexWidget  (signal: kp_index)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Type: Radial gauge (half-circle, 0–9 scale)
+Accent color: #6366f1
+
+Gauge:
+  Half-circle RadialBarChart (startAngle 180, endAngle 0)
+  Background arc: --color-surface-2
+  Fill arc: color determined by Kp value:
+    0–3 → #22c55e (Quiet)
+    4–6 → #f59e0b (Unsettled / Storm)
+    7–9 → #ef4444 (Severe Storm)
+  Corner radius: 6px on arc ends (rounded caps)
+
+Center label (below arc):
+  - Kp value (text-3xl, font-bold, colored to match arc)
+  - "Kp — Quiet / Unsettled / Storm / Severe Storm" (text-xs, muted)
+
+Data shape per item (after normalization):
+  {
+    timestamp: "2026-05-11T09:00:00",   // ISO from NOAA
+    value: {
+      kp: 2.33    // float 0–9
+    },
+    source: "NOAA_SWPC",
+    unit: "Kp"
+  }
+
+The widget reads the LAST item in the array as the current Kp value.
+
+API endpoint:
+  GET https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json
+  Returns array of objects: { time_tag, Kp, a_running, station_count }
+  Refetches every 5 minutes.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+18. WIDGET: ISSWidget  (signal: iss_coordinates)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Type: Live data readout (no chart)
+Accent color: #22c55e
+
+Live indicator (top of card body):
+  Animated green ping dot (CSS animate-ping) + "Live · refreshes every 5 minutes"
+  Dot: 8×8px, rounded-full, --color-success with opacity-75 outer ring
+
+Data rows (label + value pairs):
+  Latitude    → 4 decimal places + "°"     (font-mono)
+  Longitude   → 4 decimal places + "°"     (font-mono)
+  Altitude    → 2 decimal places + " km"   (font-mono)
+  Velocity    → rounded integer + " km/h"  (font-mono)
+  Visibility  → "daylight" or "eclipsed"   colored: daylight = #f59e0b, else muted
+
+Data shape (after normalization):
+  {
+    timestamp: "2026-05-11T14:23:05.000Z",
+    value: {
+      latitude:   51.2342,
+      longitude: -12.8871,
+      altitude:   418.34,
+      velocity:   27572,
+      visibility: "daylight"     // or "eclipsed"
+    },
+    source: "wheretheiss.at",
+    unit: "lat/lng"
+  }
+
+API endpoint:
+  GET https://api.wheretheiss.at/v1/satellites/25544
+  Returns a single object with the fields above (plus raw timestamp as Unix seconds).
+  Refetches every 5 minutes.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+19. CHART COMPONENT: TimeChart
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Library: Recharts (LineChart)
+Props:
+  data      — array of normalized signal objects
+  dataKey   — string key inside item.value to use as Y value (e.g. "speed")
+  unit      — string appended to Y axis ticks and tooltip (e.g. "km/s")
+  color     — stroke color string (CSS variable or hex)
+  label     — display name for tooltip legend
+
+Styling:
+  Height 200px, ResponsiveContainer width 100%
+  CartesianGrid: dashed, --color-border
+  XAxis: time formatted as HH:MM, text-xs, --color-text-muted, no tick lines
+  YAxis: value + unit, text-xs, --color-text-muted, no axis line
+  Tooltip background: --color-surface-2, border --color-border, rounded-lg, text-xs
+  Line: strokeWidth 2, no dots, activeDot r=4
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+20. PAGE: 404 NOT FOUND
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Full-screen centered, bg --color-bg, no navbar.
+  "404" in text-6xl, font-bold, --color-accent-hover
+  "Page not found" in text-lg, font-semibold
+  "This region of space has not been charted." in text-sm, muted
+  "Return to Dashboard" button — bg --color-accent, white text, rounded-lg, px-4 py-2
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+21. STITCH PROMPT SUGGESTION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Paste this as your Stitch prompt (adapt as needed):
+
+---
+Design a dark space-themed SPA dashboard called HELIOS DECK — a real-time
+cosmic observatory. Dark mode only. Background #0a0a0f, card surfaces #111118,
+borders #2a2a3a, primary text #e2e2f0, muted text #7a7a9a, accent indigo #6366f1.
+
+Design these 5 screens:
+
+1. LOGIN PAGE — centered card (max-w-sm) on dark background. Wordmark "HELIOS DECK"
+   in indigo at top. Username + password inputs with dark styling. Full-width indigo
+   "Sign in" button. Minimal, no decorations.
+
+2. DASHBOARD — sticky top navbar (56px, dark surface, indigo wordmark left, two nav
+   links center, logout right). Below: page title + subtitle. Then a responsive
+   widget grid (1 col mobile, 2 col tablet, 3 col desktop). Five widget cards:
+   a) Solar Flares — list of events with amber/red/green class badges (C/M/X)
+   b) Solar Wind Speed — line chart in cyan (#22d3ee) with speed + density header values
+   c) Kp Index — half-circle radial gauge 0–9, green/amber/red by severity
+   d) Coronal Mass Ejections — line chart in pink (#ec4899)
+   e) ISS Position — live readout with animated green ping dot, coordinate rows
+
+3. SIGNAL CATALOG — list of 5 clickable rows. Each row: signal name + colored type
+   badge + description on left; source + cadence on right. Hover highlights border.
+
+4. SIGNAL DETAIL — back link, signal title + description, 4-cell metadata grid
+   (Source, Unit, Cadence, ID), then the full widget below, then API URL in a
+   monospace code block.
+
+5. 404 PAGE — centered, "404" huge indigo number, short message, "Return to
+   Dashboard" button.
+
+All cards: bg #111118, border #2a2a3a, rounded-xl, padding 16px.
+All inputs: bg #1a1a24, border #2a2a3a, rounded-lg.
+Charts use Recharts. No gradients except subtle color-mix for badge backgrounds.
+Font: system-ui. Monospace values use ui-monospace.
+---
