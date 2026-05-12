@@ -1,11 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchISS } from "../lib/fetchers";
-import { normalizeISS } from "../lib/normalizers";
+import { getISS } from "../services/spaceSignals";
 
 export function useISS() {
   return useQuery({
     queryKey: ["iss"],
-    queryFn: async () => normalizeISS(await fetchISS()),
+    queryFn: getISS,
     staleTime: 5 * 60 * 1000,
     refetchInterval: 5 * 60 * 1000, // wheretheiss.at — poll every 5 minutes
   });
